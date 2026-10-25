@@ -1,0 +1,17 @@
+Source: dnsproxy
+Section: net
+Priority: optional
+Maintainer: Zoey <zoey@z0ey.de>
+Build-Depends: debhelper-compat (= 13), dh-sequence-installsysusers, golang-go
+Standards-Version: 4.7.2
+Homepage: https://github.com/AdguardTeam/dnsproxy
+Rules-Requires-Root: no
+
+Package: dnsproxy
+Architecture: any
+Multi-Arch: foreign
+Depends: ca-certificates, ${misc:Depends}, ${shlibs:Depends}
+Description: Simple DNS proxy with DoH, DoT, DoQ and DNSCrypt support
+ A simple DNS proxy server that supports all existing DNS protocols including
+ DNS-over-TLS, DNS-over-HTTPS, DNSCrypt, and DNS-over-QUIC. Moreover, it can
+ work as a DNS-over-HTTPS, DNS-over-TLS or DNS-over-QUIC server.

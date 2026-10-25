@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/pkg-info.mk
+
+export GOFLAGS := -buildmode=pie -modcacherw -trimpath -buildvcs=false
+export GOCACHE := $(CURDIR)/_build/cache
+export GOMODCACHE := $(CURDIR)/_build/mod
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	rm -rf _build bin
+
+override_dh_auto_build:
+	go build -o bin/dnsproxy -ldflags "-s -w \
+		-X github.com/AdguardTeam/golibs/version.version=v$(DEB_VERSION_UPSTREAM) \
+		-X github.com/AdguardTeam/golibs/version.committime=$(SOURCE_DATE_EPOCH)"
+
+override_dh_auto_test:
+#	go test ./...
+
+override_dh_auto_install:
+	install -Dm755 bin/dnsproxy -t debian/dnsproxy/usr/bin/
+	install -Dm644 config.dist.yaml debian/dnsproxy/etc/dnsproxy/config.yaml
