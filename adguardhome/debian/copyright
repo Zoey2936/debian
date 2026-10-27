@@ -1,0 +1,19 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: AdGuardHome
+Source: https://github.com/AdguardTeam/AdGuardHome
+
+Files: *
+Copyright: AdGuard Home contributors
+License: GPL-3
+
+Files: debian/*
+Copyright: 2026 Zoey <zoey@z0ey.de>
+License: Apache-2.0
+
+License: GPL-3
+ On Debian systems, the full text of the GNU General Public License version 3
+ can be found in the file /usr/share/common-licenses/GPL-3.
+
+License: Apache-2.0
+ On Debian systems, the full text of the Apache License, Version 2.0 can be
+ found in the file /usr/share/common-licenses/Apache-2.0.

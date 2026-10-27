@@ -1,0 +1,17 @@
+Source: adguardhome
+Section: net
+Priority: optional
+Maintainer: Zoey <zoey@z0ey.de>
+Build-Depends: debhelper-compat (= 13), dh-sequence-installsysusers, golang-go
+Standards-Version: 4.7.2
+Homepage: https://adguard.com/adguard-home.html
+Rules-Requires-Root: no
+
+Package: adguardhome
+Architecture: any
+Multi-Arch: foreign
+Depends: ca-certificates, ${misc:Depends}, ${shlibs:Depends}
+Description: Network-wide ads & trackers blocking DNS server
+ AdGuard Home is a network-wide software for blocking ads and tracking. After
+ you set it up, it'll cover ALL your home devices, and you don't need any
+ client-side software for that.
