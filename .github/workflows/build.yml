@@ -9,21 +9,40 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  packages:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+    outputs:
+      packages: ${{ steps.packages.outputs.packages }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: packages
+        run: echo "packages=$(jq -n -c '$ARGS.positional | map(rtrimstr("/"))' --args */)" >> $GITHUB_OUTPUT
+
   build-amd64:
     runs-on: ubuntu-latest
     container: debian:13.7@sha256:4c25275446ca371766b8b093c696782eabce06263fccacb8d5d813b3dc44b308
     permissions:
       contents: read
+    needs: packages
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.packages.outputs.packages) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: package
         run: |
           apt-get update
           apt-get install -y --no-install-recommends devscripts
-          for dir in */; do (cd "$dir" && origtargz --unpack && apt-get build-dep -y ./ && dpkg-buildpackage -b); done
+          sed -i "1s/-[^)-]*)/-${{ github.run_number }})/" ${{ matrix.package }}/debian/changelog
+          cd ${{ matrix.package }}
+          origtargz --unpack
+          apt-get build-dep -y ./
+          dpkg-buildpackage -b
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: amd64
+          name: amd64-${{ matrix.package }}
           path: '*.deb'
 
   build-arm64:
@@ -31,16 +50,24 @@ jobs:
     container: debian:13.7@sha256:4c25275446ca371766b8b093c696782eabce06263fccacb8d5d813b3dc44b308
     permissions:
       contents: read
+    needs: packages
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.packages.outputs.packages) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: package
         run: |
           apt-get update
           apt-get install -y --no-install-recommends devscripts
-          for dir in */; do (cd "$dir" && origtargz --unpack && apt-get build-dep -y ./ && dpkg-buildpackage -b); done
+          sed -i "1s/-[^)-]*)/-${{ github.run_number }})/" ${{ matrix.package }}/debian/changelog
+          cd ${{ matrix.package }}
+          origtargz --unpack
+          apt-get build-dep -y ./
+          dpkg-buildpackage -b
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: arm64
+          name: arm64-${{ matrix.package }}
           path: '*.deb'
 
   deploy:
