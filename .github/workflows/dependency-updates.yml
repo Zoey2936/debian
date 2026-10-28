@@ -1,0 +1,58 @@
+name: dependency-updates
+on:
+  push:
+    branches:
+      - develop
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash
+jobs:
+  version-updates:
+    name: ${{ matrix.name }}-update
+    runs-on: ubuntu-slim
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: adguardhome
+            repo: AdguardTeam/AdGuardHome
+          - name: dnsproxy
+            repo: AdguardTeam/dnsproxy
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: update ${{ matrix.name }} version
+        id: update
+        run: |
+          VER="$(
+          git ls-remote --tags --refs https://github.com/${{ matrix.repo }} \
+              | cut -d/ -f3 \
+              | grep "^v[0-9.]\+$" \
+              | sort -V \
+              | tail -1 \
+              | sed "s|^v||"
+          )"
+          CL=${{ matrix.name }}/debian/changelog
+          OLD="$(sed -n "1s|^[^ ]* (\([0-9]*:\)\{0,1\}\([^-)]*\).*|\2|p" "$CL")"
+          if [ "$VER" != "$OLD" ]; then
+            printf "%s\n\n  * New upstream release.\n\n -- %s  %s\n\n" "$(sed -n "1s|(\([0-9]*:\)\{0,1\}[^)]*)|(\1$VER-1)|p" "$CL")" "$(sed -n "s|^ -- \(.*>\)  .*|\1|p" "$CL" | head -1)" "$(date -R)" | cat - "$CL" > "$CL.new"
+            mv "$CL.new" "$CL"
+          fi
+          echo "compare=https://github.com/${{ matrix.repo }}/compare/v$OLD...v$VER" >> $GITHUB_OUTPUT
+          echo "version=$VER" >> $GITHUB_OUTPUT
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          signoff: true
+          delete-branch: true
+          commit-message: update ${{ matrix.name }} version to ${{ steps.update.outputs.version }}
+          branch: update-${{ matrix.name }}-version
+          title: update ${{ matrix.name }} version to ${{ steps.update.outputs.version }}
+          body: ${{ steps.update.outputs.compare }}
