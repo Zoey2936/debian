@@ -1,3 +1,9 @@
+adguardhome (1.0.0-1) trixie; urgency=low
+
+  * New upstream release.
+
+ -- Zoey <zoey@z0ey.de>  Thu, 19 Nov 2026 17:46:52 +0000
+
 adguardhome (0.107.80-1) trixie; urgency=low
 
   * New upstream release.
