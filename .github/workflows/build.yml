@@ -35,7 +35,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends devscripts
-          sed -i "1s/-[^)-]*)/-${{ github.run_number }})/" ${{ matrix.package }}/debian/changelog
+          sed -i "1s|-[^)-]*)|-${{ github.run_number }})|" ${{ matrix.package }}/debian/changelog
           cd ${{ matrix.package }}
           origtargz --unpack
           apt-get build-dep -y ./
@@ -60,7 +60,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends devscripts
-          sed -i "1s/-[^)-]*)/-${{ github.run_number }})/" ${{ matrix.package }}/debian/changelog
+          sed -i "1s|-[^)-]*)|-${{ github.run_number }})|" ${{ matrix.package }}/debian/changelog
           cd ${{ matrix.package }}
           origtargz --unpack
           apt-get build-dep -y ./
